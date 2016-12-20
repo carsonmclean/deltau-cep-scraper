@@ -84,9 +84,8 @@ def main():
     chapter_URLs = getChapterURLs()
 
     pbar = ProgressBar()
-    # for url in pbar(chapter_URLs):
-    #     walkChapterCriteria(url)
-    walkChapterCriteria(chapter_URLs[0])
+    for url in pbar(chapter_URLs):
+        walkChapterCriteria(url)
 
 
 if __name__ == '__main__':
