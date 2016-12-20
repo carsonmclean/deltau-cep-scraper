@@ -16,25 +16,37 @@ def getChapterURLs():
         chapter_URLs.append(str(a['href']))
     return chapter_URLs
 
+
 def walkChapterCriteria(url):
     chapter_criteria_URL = 'http://www.deltau.org' + url + 'CriteriaList'
     r = requests.post(chapter_criteria_URL, data = {'filter': 'Fall Criteria'})
 
     soup = BeautifulSoup(r.text, 'html.parser')
-    criteria = soup.find_all('li')
+    criteria_list = soup.find_all('li')
+    chapter_name = urllib2.unquote(url.split('/')[2])
 
-    for i in criteria:
-        checkSubmission(i)
+    for criteria in criteria_list:
+        checkSubmission(criteria, chapter_name)
 
-def checkSubmission(criteria):
+
+def checkSubmission(criteria, chapter_name):
     if criteria.find('a', 'fancybox'):
-        checkFolder(criteria)
+        folder_title = "CEP/" + criteria.h4.a.encode_contents().replace('/','|')
+        checkFolder(folder_title)
+        makeFolder(folder_title + '/' + chapter_name)
 
-def checkFolder(criteria):
-    folder_title = "CEP/" + criteria.h4.a.encode_contents().replace('/','|')
-    print(folder_title)
+
+def checkFolder(folder_title):
     if not os.path.exists(folder_title):
         os.makedirs(folder_title)
+
+
+def makeFolder(folder_title):
+    if not os.path.exists(folder_title):
+        os.makedirs(folder_title)
+    else:
+        print("This Chapter's folder already exists: " + folder_title)
+
 
 def main():
     chapter_URLs = getChapterURLs()
@@ -43,6 +55,7 @@ def main():
     # for url in pbar(chapter_URLs):
     #     walkChapterCriteria(url)
     walkChapterCriteria(chapter_URLs[0])
+
 
 if __name__ == '__main__':
     main()
