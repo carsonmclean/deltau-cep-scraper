@@ -3,6 +3,7 @@ from progressbar import ProgressBar
 
 import requests
 import os
+import urllib
 import urllib2
 
 
@@ -40,6 +41,7 @@ def checkSubmission(criteria, chapter_name):
         page = urllib2.urlopen(submission_URL).read()
         soup = BeautifulSoup(page, 'html.parser')
         saveDescription(soup, folder_title + '/' + chapter_name)
+        saveFiles(soup, folder_title + '/' + chapter_name)
 
 
 def checkFolder(folder_title):
@@ -60,6 +62,22 @@ def saveDescription(page, folder_title):
     text_file.write(description)
     text_file.close()
 
+
+def saveFiles(page, folder_title):
+    file_URL_list = page.select('div div ul li a')
+    # Get rid of FB and email links in footer
+    file_URL_list = file_URL_list[:-2]
+    for file_URL in file_URL_list:
+        file_URL = file_URL['href']
+        file_URL = 'http://www.deltau.org' + str(file_URL)
+
+        remotefile=urllib2.urlopen(file_URL)
+        try:
+            filename=remotefile.info()['Content-Disposition'][22:-1]
+        except KeyError:
+            print('=== KeyError ===\n\n')
+            filename=os.path.basename(urllib2.urlparse.urlsplit(file_URL).path)
+        urllib.urlretrieve(file_URL, folder_title + '/' +  filename)
 
 
 def main():
