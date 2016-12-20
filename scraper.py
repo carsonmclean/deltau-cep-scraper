@@ -30,10 +30,16 @@ def walkChapterCriteria(url):
 
 
 def checkSubmission(criteria, chapter_name):
+    # Only continue for Chapter's that have an accepted CEP criteria
     if criteria.find('a', 'fancybox'):
         folder_title = "CEP/" + criteria.h4.a.encode_contents().replace('/','|')
         checkFolder(folder_title)
         makeFolder(folder_title + '/' + chapter_name)
+
+        submission_URL = 'http://www.deltau.org' + criteria.find('a', 'fancybox')['href']
+        page = urllib2.urlopen(submission_URL).read()
+        soup = BeautifulSoup(page, 'html.parser')
+        saveDescription(soup, folder_title + '/' + chapter_name)
 
 
 def checkFolder(folder_title):
@@ -46,6 +52,14 @@ def makeFolder(folder_title):
         os.makedirs(folder_title)
     else:
         print("This Chapter's folder already exists: " + folder_title)
+
+
+def saveDescription(page, folder_title):
+    description = page.select('div div p')[0].encode_contents()
+    text_file = open(folder_title + "/description.txt", "w")
+    text_file.write(description)
+    text_file.close()
+
 
 
 def main():
